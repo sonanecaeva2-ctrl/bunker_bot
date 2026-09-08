@@ -6,8 +6,7 @@
     // "outDir": "./dist",
 
     // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "ignoreDeprecations": "6.0",
+    // See also https://aka.ms/tsconfig/modul
     "module": "ESNext",
     "types": [],
     "moduleResolution": "bundler",
