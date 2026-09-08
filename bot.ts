@@ -25,6 +25,8 @@ async function initDB() {
   return db;
 }
 
+console.log('🔑 Токен:', process.env.BOT_TOKEN ? '✅ получен' : '❌ не найден');
+
 // 2. Создаём бота
 const bot = new Bot(process.env.BOT_TOKEN!);
 const db = await initDB();
