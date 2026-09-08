@@ -4,6 +4,12 @@ import { Bot, Keyboard } from '@maxhub/max-bot-api';
 import dotenv from 'dotenv';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Для ES-модулей — получаем __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -14,7 +20,6 @@ async function initDB() {
     driver: sqlite3.Database,
   });
 
-  // Создаём таблицу, если её нет
   await db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       user_id INTEGER PRIMARY KEY,
@@ -31,7 +36,7 @@ console.log('🔑 Токен:', process.env.BOT_TOKEN ? '✅ получен' : '
 const bot = new Bot(process.env.BOT_TOKEN!);
 const db = await initDB();
 
-// 3. Создаём клавиатуру ОДИН РАЗ (глобально)
+// 3. Клавиатура
 const mainKeyboard = Keyboard.inlineKeyboard([
   [
     Keyboard.button.link(
@@ -53,31 +58,41 @@ const mainKeyboard = Keyboard.inlineKeyboard([
   ],
 ]);
 
-// 4. Функция приветствия — сохраняет нового пользователя
+// 4. Функция приветствия
 async function sendWelcomeMessage(ctx: any) {
   const userId = ctx.user?.user_id;
 
   if (userId) {
-    // Проверяем, есть ли пользователь в базе
     const existing = await db.get('SELECT * FROM users WHERE user_id = ?', userId);
 
     if (!existing) {
-      // Новый пользователь
       await db.run('INSERT INTO users (user_id) VALUES (?)', userId);
       const total = await db.get('SELECT COUNT(*) as count FROM users');
+      console.log(`👤 Новый пользователь! Всего: ${total.count}`);
     }
+  }
+
+  // Пытаемся загрузить картинку
+  let image;
+  try {
+    const imagePath = path.join(__dirname, 'src', 'images', 'image_bunker.png');
+    image = await ctx.api.uploadImage({
+      source: imagePath,
+    });
+  } catch (error) {
+    console.log('⚠️ Картинка не загружена, отправляем только текст');
   }
 
   // Отправляем приветствие
   await ctx.reply(
     `Добрый день! В данном боте вы можете узнать адрес ближайшего к вам укрытия в случае объявления воздушной угрозы. Выберите пункт ниже:`,
     {
-      attachments: [mainKeyboard],
+      attachments: image ? [image.toJson(), mainKeyboard] : [mainKeyboard],
     }
   );
 }
 
-// 5. Команда для просмотра статистики
+// 5. Статистика
 bot.command('stats', async (ctx) => {
   const total = await db.get('SELECT COUNT(*) as count FROM users');
   await ctx.reply(`👥 Всего пользователей: ${total.count}`);
@@ -95,3 +110,5 @@ bot.command('start', async (ctx) => {
 
 // 8. Запускаем бота
 bot.start();
+
+console.log('✅ Бот запущен! База данных подключена.');
