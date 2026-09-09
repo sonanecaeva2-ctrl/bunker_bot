@@ -46,13 +46,13 @@ const mainKeyboard = Keyboard.inlineKeyboard([
   ],
   [
     Keyboard.button.link(
-      '📝 Уточнить информацию или задать вопрос',
+      '📝 Задать вопрос',
       'https://pos.gosuslugi.ru/form/?opaId=277439&utm_source=vk&utm_mediu%20m=11&utm_campaign=1052901000811'
     ),
   ],
   [
     Keyboard.button.link(
-      '📢 Следить за обстановкой',
+      '📢 Оперативная обстановка',
       'https://max.ru/id2901131820_gos'
     ),
   ],
@@ -85,7 +85,7 @@ async function sendWelcomeMessage(ctx: any) {
 
   // Отправляем приветствие
   await ctx.reply(
-    `Добрый день! В данном боте вы можете узнать адрес ближайшего к вам укрытия в случае объявления воздушной угрозы. Выберите пункт ниже:`,
+    `Добрый день!\n\nС помощью этого бота вы сможете узнать адрес ближайшего укрытия при объявлении воздушной угрозы.\n\nВыберите пункт ниже:`,
     {
       attachments: image ? [image.toJson(), mainKeyboard] : [mainKeyboard],
     }
